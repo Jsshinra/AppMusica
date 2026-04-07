@@ -25,6 +25,14 @@ class YTMusicHandler:
                     "type": "album",
                     "results": results[:5] 
                 }
+            elif search_type == "artist":
+                results = self.yt.search(query, filter="artists")
+                if not results:
+                    return {"type": "none", "results": []}
+                return {
+                    "type": "artist",
+                    "results": results[:5] 
+                }
                 
             results = self.yt.search(query, filter="songs")
             if not results:
@@ -72,6 +80,11 @@ class YTMusicHandler:
         # item can be a song (videoId), a playlist (browseId) or an album (playlistId or browseId)
         if 'videoId' in item and item['videoId']:
             return f"https://music.youtube.com/watch?v={item['videoId']}"
+        elif 'shuffleId' in item:
+            # Para reproducir automáticamente las mejores canciones de un artista
+            return f"https://music.youtube.com/watch?list={item['shuffleId']}"
+        elif 'radioId' in item:
+            return f"https://music.youtube.com/watch?list={item['radioId']}"
         elif 'playlistId' in item:
             # Para albums o playlists que devuelven un playlistId, usar watch?list= para auto-play de la lista
             return f"https://music.youtube.com/watch?list={item['playlistId']}"

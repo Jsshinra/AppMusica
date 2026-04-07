@@ -9,14 +9,13 @@ def parse_intent(transcribed_text):
     text = transcribed_text.lower()
     text = remove_accents(text)
     # Remove filler words or leading words
-    # Punctuation cleaning
-    text = re.sub(r'[^\w\s]', '', text)
-    
     search_type = "song"
     if "playlist" in text or "lista" in text:
         search_type = "playlist"
     elif "album" in text or "álbum" in text or "disco" in text:
         search_type = "album"
+    elif "canciones de" in text or "musica de" in text or "temas de" in text or "algo de" in text:
+        search_type = "artist"
     
     # Priority patterns (more specific to less specific)
     patterns = [
@@ -65,7 +64,18 @@ def parse_intent(transcribed_text):
         query = query.replace("playlist", "").replace("lista", "").strip()
     elif search_type == "album":
         query = query.replace("album", "").replace("álbum", "").replace("disco", "").strip()
+    elif search_type == "artist":
+        query = query.replace("canciones de", "").replace("musica de", "").replace("temas de", "").replace("algo de", "").strip()
         
+    # Catch-all para cuando el usuario dice directamente "de [artista]" o "a [artista]"
+    if search_type == "song":
+        if query.startswith("de "):
+            query = query[3:].strip()
+            search_type = "artist"
+        elif query.startswith("a "):
+            query = query[2:].strip()
+            search_type = "artist"
+            
     if not query or query in ["de", "mi", "musica"]:
         query = text.strip()
 

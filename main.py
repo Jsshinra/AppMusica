@@ -774,6 +774,8 @@ class VoiceMusicApp(QMainWindow):
                 tipo = "playlist"
             elif search_type == "album":
                 tipo = "álbum"
+            elif search_type == "artist":
+                tipo = "artista"
             else:
                 tipo = "canción"
                 
