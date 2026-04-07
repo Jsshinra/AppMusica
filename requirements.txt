@@ -1,0 +1,9 @@
+customtkinter
+pystray
+Pillow
+ytmusicapi
+faster-whisper
+keyboard
+sounddevice
+soundfile
+numpy
