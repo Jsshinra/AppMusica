@@ -462,15 +462,25 @@ class VoiceMusicApp(QMainWindow):
         self.browser_profile.setCachePath(cache_dir)
         
         # 3. Spoofing (Falsificar) el User-Agent para que Google permita el inicio de sesión
-        # TRUCO: Usar Firefox engaña a Google para que no haga la verificación de seguridad obligatoria de Chromium embebido.
-        user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0"
+        # TRUCO: A veces Chrome en Windows 10/11 es el más confiable para loguear hoy en día.
+        user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
         self.browser_profile.setHttpUserAgent(user_agent)
         
         settings = self.browser_profile.settings()
         settings.setAttribute(QWebEngineSettings.PlaybackRequiresUserGesture, False)
+        settings.setAttribute(QWebEngineSettings.JavascriptEnabled, True)
+        settings.setAttribute(QWebEngineSettings.LocalStorageEnabled, True)
+        settings.setAttribute(QWebEngineSettings.ScrollAnimatorEnabled, True)
+        settings.setAttribute(QWebEngineSettings.WebGLEnabled, True)
+        settings.setAttribute(QWebEngineSettings.PluginsEnabled, True)
+        settings.setAttribute(QWebEngineSettings.JavascriptCanOpenWindows, True)
+        settings.setAttribute(QWebEngineSettings.JavascriptCanAccessClipboard, True)
         
         # 4. Inyectar script para matar diálogos y onbeforeunload a nivel DOM (Doble protección)
         script_code = """
+        // Hacer que no parezca un navegador automatizado
+        Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+        
         window.alert = function() { console.log("Alert bloqueado"); };
         window.confirm = function() { return true; };
         window.prompt = function() { return null; };
