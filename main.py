@@ -762,7 +762,7 @@ class VoiceMusicApp(QMainWindow):
                 return
                 
             self.signals.update_status.emit(f"Analizando...", False)
-            query, is_playlist = parse_intent(text)
+            query, search_type = parse_intent(text)
             self.signals.set_last_query.emit(query)
             
             if not query or len(query) < 2:
@@ -770,11 +770,17 @@ class VoiceMusicApp(QMainWindow):
                 self.play_beep("error")
                 return
             
-            tipo = "playlist" if is_playlist else "canción"
+            if search_type == "playlist":
+                tipo = "playlist"
+            elif search_type == "album":
+                tipo = "álbum"
+            else:
+                tipo = "canción"
+                
             self.signals.update_status.emit(f"Buscando {tipo}...", False)
             auto_play = self.config.get("auto_play", True)
             
-            search_response = self.ytm.search_and_process(query, is_playlist=is_playlist)
+            search_response = self.ytm.search_and_process(query, search_type=search_type)
             
             results = search_response.get("results")
             if not results:

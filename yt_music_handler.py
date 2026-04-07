@@ -6,15 +6,23 @@ class YTMusicHandler:
     def __init__(self):
         self.yt = YTMusic()
         
-    def search_and_process(self, query, is_playlist=False):
+    def search_and_process(self, query, search_type="song"):
         try:
-            if is_playlist:
+            if search_type == "playlist":
                 results = self.yt.search(query, filter="playlists")
                 if not results:
                     return {"type": "none", "results": []}
                 # Return the top playlists
                 return {
                     "type": "playlist",
+                    "results": results[:5] 
+                }
+            elif search_type == "album":
+                results = self.yt.search(query, filter="albums")
+                if not results:
+                    return {"type": "none", "results": []}
+                return {
+                    "type": "album",
                     "results": results[:5] 
                 }
                 
@@ -61,16 +69,19 @@ class YTMusicHandler:
             return {"type": "none", "results": []}
             
     def get_url(self, item):
-        # item can be a song (videoId) or a playlist (browseId)
-        if 'videoId' in item:
-            # En youtube music un song se reproduce asi (a veces con un playlist dict)
+        # item can be a song (videoId), a playlist (browseId) or an album (playlistId or browseId)
+        if 'videoId' in item and item['videoId']:
             return f"https://music.youtube.com/watch?v={item['videoId']}"
+        elif 'playlistId' in item:
+            # Para albums o playlists que devuelven un playlistId, usar watch?list= para auto-play de la lista
+            return f"https://music.youtube.com/watch?list={item['playlistId']}"
         elif 'browseId' in item:
-            # Playlists se pueden reproducir pasandolo como parametro un playlistId format
-            # browseId for playlists usually starts with VLPL or PL
-            # we need to get the real playlist id if it starts with VL
             pl_id = item['browseId']
             if pl_id.startswith('VL'):
                 pl_id = pl_id[2:]
-            return f"https://music.youtube.com/playlist?list={pl_id}"
+            elif pl_id.startswith('MPREb_'):
+                # Los álbumes que no listan playlistId a veces se pueden reproducir pasándolos con el prefijo correcto
+                pass
+            # Usar watch para que reproduzca la lista (auto-play)
+            return f"https://music.youtube.com/watch?list={pl_id}"
         return "https://music.youtube.com"

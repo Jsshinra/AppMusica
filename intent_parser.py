@@ -12,30 +12,42 @@ def parse_intent(transcribed_text):
     # Punctuation cleaning
     text = re.sub(r'[^\w\s]', '', text)
     
-    is_playlist = False
+    search_type = "song"
     if "playlist" in text or "lista" in text:
-        is_playlist = True
+        search_type = "playlist"
+    elif "album" in text or "álbum" in text or "disco" in text:
+        search_type = "album"
     
     # Priority patterns (more specific to less specific)
     patterns = [
         r'quiero escuchar la playlist (.*)',
+        r'quiero escuchar el album (.*)',
+        r'quiero escuchar el disco (.*)',
         r'quiero escuchar la cancion (.*)',
         r'quiero escuchar la lista (.*)',
         r'quiero escuchar (.*)',
         r'reproducir la playlist (.*)',
+        r'reproducir el album (.*)',
+        r'reproducir el disco (.*)',
         r'reproducir la cancion (.*)',
         r'reproducir la lista (.*)',
         r'reproducir mi playlist (.*)',
         r'reproducir (.*)',
         r'reproduci (.*)',
         r'poneme la playlist (.*)',
+        r'poneme el album (.*)',
+        r'poneme el disco (.*)',
         r'poneme la de (.*)',
         r'poneme (.*)',
         r'pone la playlist (.*)',
+        r'pone el album (.*)',
+        r'pone el disco (.*)',
         r'pone la cancion (.*)',
         r'pone la lista (.*)',
         r'pone (.*)',
         r'busca la playlist (.*)',
+        r'busca el album (.*)',
+        r'busca el disco (.*)',
         r'busca la cancion (.*)',
         r'buscar (.*)',
         r'busca (.*)'
@@ -48,11 +60,13 @@ def parse_intent(transcribed_text):
             query = match.group(1).strip()
             break
             
-    # Clean the word playlist if it's still in the query
-    if is_playlist:
+    # Clean the keyword if it's still in the query
+    if search_type == "playlist":
         query = query.replace("playlist", "").replace("lista", "").strip()
-        # Si quedó vacío el query o es irrelevante
-        if not query or query in ["de", "mi", "musica"]:
-            query = text.strip()
+    elif search_type == "album":
+        query = query.replace("album", "").replace("álbum", "").replace("disco", "").strip()
+        
+    if not query or query in ["de", "mi", "musica"]:
+        query = text.strip()
 
-    return query, is_playlist
+    return query, search_type
